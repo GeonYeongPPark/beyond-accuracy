@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beyond Accuracy: Auditing Agent-Removal Sensitivity in Motion Forecasting</title>
+<meta name="description" content="NeurIPS 2026 E&amp;D Track. Which surrounding agents does a motion forecast depend on? Leave-one-out agent removal audits five models on Argoverse 2 and Waymo.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://geonyeongppark.github.io/beyond-accuracy/">
+<meta property="og:title" content="Beyond Accuracy: Auditing Agent-Removal Sensitivity in Motion Forecasting">
+<meta property="og:description" content="NeurIPS 2026 E&amp;D Track. Which surrounding agents does a motion forecast depend on? Leave-one-out agent removal audits five models on Argoverse 2 and Waymo.">
+<meta property="og:image" content="https://geonyeongppark.github.io/beyond-accuracy/static/images/overview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Beyond Accuracy: Auditing Agent-Removal Sensitivity in Motion Forecasting">
+<meta name="twitter:description" content="NeurIPS 2026 E&amp;D Track. Which surrounding agents does a motion forecast depend on? Leave-one-out agent removal audits five models on Argoverse 2 and Waymo.">
+<meta name="twitter:image" content="https://geonyeongppark.github.io/beyond-accuracy/static/images/overview.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23151B20'/%3E%3Cpath d='M3 16h6M13 16h6M23 16h6' stroke='%23E9AE2E' stroke-width='2.5' stroke-linecap='round'/%3E%3Crect x='10' y='7' width='12' height='6' rx='1.5' fill='%23EEF2F4'/%3E%3Crect x='10' y='19' width='12' height='6' rx='1.5' fill='none' stroke='%23E9AE2E' stroke-width='1.5' stroke-dasharray='2 2'/%3E%3C/svg%3E">
+<!-- Nerfies-style project page (Bulma). Text and numbers follow the camera-ready paper (v4); keep them in sync. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  body { font-family: 'Noto Sans', sans-serif; color: #363636; }
+  .title, .publication-title, .publication-authors, .teaser { font-family: 'Google Sans', 'Noto Sans', sans-serif; }
+
+  /* title block */
+  .publication-title { line-height: 1.15; }
+  .title-mark { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle;
+                margin-right: 0.15em; margin-bottom: 6px; }
+  .title-emoji { font-size: 1.45em; line-height: 1; }
+  .title-bar { display: flex; width: 92%; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 3px; }
+  .title-bar i { flex: 1; }
+  .title-brand { font-weight: 900; font-size: 1.2em; vertical-align: middle; }
+  .c-beyond { color: #1F77B4; }
+  .c-accuracy { color: #FF7F0E; }
+  .title-sub { font-weight: 600; display: block; margin-top: 10px; font-size: 0.72em; color: #2b2b2b; }
+  .publication-venue { color: #555; font-weight: 700; margin-top: 0.6rem; }
+  .publication-authors { margin-top: 0.5rem; }
+  .author-block { display: inline-block; }
+  .publication-authors a { color: hsl(204, 86%, 53%) !important; }
+  .eql-cntrb { font-size: 0.85em; color: #666; }
+  .link-block a { margin: 5px 3px; }
+  .button.is-dark.is-soon { opacity: 0.55; }
+
+  /* body */
+  .teaser .hero-body { padding-top: 0; padding-bottom: 2.5rem; }
+  .tagline { font-size: 1.12rem; }
+  .fig { margin: 1.25rem auto 0.25rem; }
+  .fig img, .fig video { width: 100%; height: auto; display: block; border-radius: 6px; }
+  .fig-caption { font-size: 0.92rem; color: #555; text-align: left; margin-top: 0.55rem; line-height: 1.5; }
+  .section .title.is-3 { margin-bottom: 1.4rem; }
+  .finding-tag { display: inline-block; font-weight: 700; font-size: 0.8em; color: #fff; border-radius: 999px;
+                 padding: 0.1em 0.65em; margin-right: 0.45em; vertical-align: 0.15em; }
+  .tag-f1 { background: #1F77B4; } .tag-f2 { background: #E91E63; } .tag-f3 { background: #8C564B; }
+  .check-card { height: 100%; border-radius: 10px; border: 1px solid #e5e7eb; padding: 1rem 1.1rem; background: #fafafa; }
+  .check-card h4 { font-family: 'Google Sans', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 0.25rem; }
+  .check-card .rules { font-style: italic; color: #555; font-size: 0.92rem; }
+  .check-card .num { margin-top: 0.4rem; font-size: 0.95rem; }
+  .axis-card { border-radius: 10px; padding: 1.1rem 1.2rem; height: 100%; }
+  .axis-primary { background: #eef5fc; border: 1px solid #cfe2f5; }
+  .axis-secondary { background: #f7f1ee; border: 1px solid #ead9d1; }
+  .axis-card h4 { font-family: 'Google Sans', sans-serif; font-weight: 700; margin-bottom: 0.35rem; }
+  .katex-display { margin: 1rem 0 1.1rem; }
+  pre { white-space: pre-wrap; word-break: break-word; }
+  .footer { padding: 2.5rem 1.5rem 3rem; }
+
+  @media screen and (max-width: 768px) {
+    .publication-title.is-1 { font-size: 2.1rem; }
+    .title-sub { font-size: 0.8em; }
+    .tagline { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+<!-- ───────── Title ───────── -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            <span class="title-mark" aria-hidden="true">
+              <span class="title-emoji">🚗</span>
+              <span class="title-bar"><i style="background:#1F77B4"></i><i style="background:#FF7F0E"></i><i style="background:#2CA02C"></i><i style="background:#D62728"></i><i style="background:#9467BD"></i></span>
+            </span>
+            <span class="title-brand"><span class="c-beyond">Beyond</span> <span class="c-accuracy">Accuracy</span>:</span>
+            <span class="title-sub">Auditing Agent-Removal Sensitivity<br>in Motion Forecasting</span>
+          </h1>
+          <div class="is-size-5 publication-venue">NeurIPS 2026 · E&amp;D Track</div>
+
+          <div class="is-size-5 publication-authors">
+            <!-- TODO: add personal page links as <a href="...">Name</a> if wanted -->
+            <span class="author-block">Geonyeong Park,</span>
+            <span class="author-block">Byounghun Park,</span>
+            <span class="author-block">Nayoung Kim,</span>
+            <span class="author-block">Kyungmin Kim,</span>
+            <span class="author-block">Soonmin Hwang<sup>*</sup></span>
+          </div>
+          <div class="is-size-6 publication-authors">
+            <span class="author-block">Department of Automotive Engineering, Hanyang University, Seoul, South Korea</span>
+            <span class="eql-cntrb"><br><sup>*</sup>Corresponding author</span>
+          </div>
+
+          <div class="publication-links">
+            <!-- TODO: replace href="#" and drop is-soon when each link exists (LOO scores are released in the code repo) -->
+            <span class="link-block">
+              <a href="#" class="external-link button is-normal is-rounded is-dark is-soon" title="coming soon">
+                <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper (soon)</span></a>
+            </span>
+            <span class="link-block">
+              <a href="#" class="external-link button is-normal is-rounded is-dark is-soon" title="coming soon">
+                <span class="icon"><i class="ai ai-arxiv"></i></span><span>arXiv (soon)</span></a>
+            </span>
+            <span class="link-block">
+              <a href="#" class="external-link button is-normal is-rounded is-dark is-soon" title="coming soon">
+                <span class="icon"><i class="fab fa-github"></i></span><span>Code (soon)</span></a>
+            </span>
+            <span class="link-block">
+              <a href="#BibTeX" class="button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fas fa-quote-left"></i></span><span>BibTeX</span></a>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── Teaser ───────── -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <p class="content has-text-justified tagline">
+        <strong>Beyond Accuracy</strong> asks which surrounding agents a motion forecast depends on.
+        We hide one agent at a time, re-run the model, and record how much its forecast error moves:
+        its <em>agent-removal sensitivity</em>. Five models with similar accuracy show near-zero agreement
+        on it (mean pairwise Spearman ρ ≈ 0.02).
+      </p>
+      <figure class="fig">
+        <img src="static/images/overview.png" alt="Five models with similar Waymo minADE6 and, below, one Waymo scene coloured by each model's LOO scores with its top-1 agent ringed" loading="eager">
+        <figcaption class="fig-caption"><strong>Similar accuracy, different agents.</strong>
+          Top: in-domain Waymo minADE<sub>6</sub>. Bottom: one Waymo scene coloured by each model's LOO scores,
+          its top-1 agent ringed. Over all scenes, the mean pairwise Spearman ρ of the rankings is 0.026 (AV2)
+          and 0.021 (Waymo).</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── Abstract ───────── -->
+<section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Motion forecasting models are mainly evaluated by trajectory-level accuracy metrics.
+            However, these metrics do not directly evaluate which surrounding agents a model relies on for prediction—that is, agent-level reliance.
+            We adopt leave-one-out (LOO) agent removal as a model-agnostic, output-based, linear-cost intervention.
+            It measures how sensitive a model's forecast error is to removing a single agent; we call this quantity <em>agent-removal sensitivity</em>.
+            We formalize this as the <em>LOO Reliance Audit</em> protocol.
+            We evaluate five architecturally distinct motion models on Argoverse 2 and the Waymo Open Motion Dataset, validate the protocol along four aspects—faithfulness, non-reducibility, stability, and convergence—and then derive three findings.
+            Across the five architectures, agent-reliance rankings exhibit near-zero agreement (mean pairwise Spearman ρ ≈ 0.02), consistently reproduced across both benchmarks (<strong>F1</strong>).
+            LOO reliance is only partially aligned with human-annotated causal agents: in 17.4% of scenes, no model selects any majority-labeled causal agent as its top-1 (<strong>F2</strong>).
+            In addition, within-model agreement between attention and LOO rankings is very low, suggesting that attention currently does not function as a reliable proxy for agent-removal sensitivity (<strong>F3</strong>).
+            Overall, current motion forecasting evaluation supports trajectory accuracy but does not support claims about <em>what models rely on for prediction</em>.
+            We propose adding to existing benchmarks the two progress axes defined by the audit—<em>how well a model's reliance aligns with human-annotated causal agents</em> and <em>how well attention and LOO rankings agree within the same model</em>.
+            Code and per-scene LOO scores are publicly released.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── Protocol ───────── -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">LOO Reliance Audit</h2>
+    <div class="content has-text-justified">
+      <p>
+        The audit hides one agent from the model input, re-runs the forecast, and measures how much its error moves
+        against the same recorded future. For a scene \(S\) and a surrounding agent \(a_i\), the LOO score of \(a_i\) is
+      </p>
+      \[ \Delta_i \;=\; \mathrm{minADE}_6\big(f(S \setminus \{a_i\}),\, y\big) \;-\; \mathrm{minADE}_6\big(f(S),\, y\big). \]
+      <p>
+        Masking \(a_i\) sets its trajectory coordinates to zero and turns off its valid flag at every timestep, so every
+        evaluated model skips it as absent; the map and all other agents are unchanged. A positive \(\Delta_i\) means the
+        forecast got worse without \(a_i\) and a negative one that it got better; a zero score means no effect under this
+        cost, not necessarily an identical output. We use <em>reliance</em> only as shorthand for this quantity, not as a
+        causal effect, semantic importance, or internal reasoning.
+      </p>
+    </div>
+    <figure class="fig">
+      <img src="static/images/protocol.png" alt="The LOO Reliance Audit protocol and a worked example on one Waymo scene" loading="lazy">
+      <figcaption class="fig-caption"><strong>The protocol.</strong> Bottom: each surrounding agent \(a_i\) of a scene
+        \(S\) is masked in turn, the signed change in minADE<sub>6</sub> against the recorded future is its agent-removal
+        sensitivity \(\Delta_i\), and the rankings are compared across models, with human causal labels, and with attention
+        (RQ1–RQ3). Top right: the same steps for MTR on the scene above, where hiding the vehicle ahead (\(a_i\)) costs the
+        most.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ───────── Validation ───────── -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Validated before use</h2>
+    <p class="content has-text-justified">Before reporting findings, we check the measurement along four aspects; each check rules out one way the scores could mislead.</p>
+    <div class="columns is-multiline">
+      <div class="column is-half-tablet is-one-quarter-desktop"><div class="check-card">
+        <h4>Faithfulness</h4><p class="rules">Rules out: the LOO ranking is arbitrary.</p>
+        <p class="num">Removing the top-5 LOO agents hurts more than a random 5, which hurts more than the bottom 5, in 67% (AV2) / 63% (Waymo) of scenes on average over the five models; chance 1/6.</p></div></div>
+      <div class="column is-half-tablet is-one-quarter-desktop"><div class="check-card">
+        <h4>Non-reducibility</h4><p class="rules">Rules out: LOO merely re-encodes distance or attention.</p>
+        <p class="num">Ranking the same agents by distance or by attention gives about 0.20, near chance.</p></div></div>
+      <div class="column is-half-tablet is-one-quarter-desktop"><div class="check-card">
+        <h4>Stability</h4><p class="rules">Rules out: small input changes reshuffle the ranking.</p>
+        <p class="num">Within-model ρ against the original ranking: 0.47 (noise), 0.57 (dropout), 0.55 (dummy injection) on AV2.</p></div></div>
+      <div class="column is-half-tablet is-one-quarter-desktop"><div class="check-card">
+        <h4>Convergence</h4><p class="rules">Rules out: single-agent deletion disagrees with multi-agent marginal attribution.</p>
+        <p class="num">LOO top-1 matches Monte Carlo Shapley top-1 in 49.4% (AV2) / 48.9% (Waymo) of scenes; chance ≈ 4%.</p></div></div>
+    </div>
+    <figure class="fig">
+      <img src="static/images/validation.png" alt="Validation summary: faithfulness, stability and convergence" loading="lazy">
+      <figcaption class="fig-caption"><strong>Validation at a glance.</strong> Bars are means over the five models and
+        whiskers the min–max range. (a) Strict ordering rate for 5-agent group removal ranked by LOO, distance, or attention
+        (attention: four models; dashed: chance 1/6). (b) Within-model Spearman ρ between perturbed and original LOO rankings
+        on AV2. (c) Rate at which LOO top-1 matches Monte Carlo Shapley top-1 on 2,000-scene subsets (dashed: chance ≈ 4%).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ───────── Findings ───────── -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Three findings</h2>
+
+    <h3 class="title is-4"><span class="finding-tag tag-f1">F1</span>Models disagree on which agents matter</h3>
+    <div class="content has-text-justified">
+      <p>
+        Mean cross-model Spearman ρ between LOO rankings is 0.026 on AV2 (max 0.055) and 0.021 on Waymo (max 0.032).
+        The same near-zero level holds across LOO ablation forms, scene stratifications, within-architecture seed ablations,
+        and input perturbations, and retraining each architecture with two additional seeds (15 Waymo checkpoints) confirms
+        that it is not an artifact of a single training run. Under the same mask and outcome, the models rank agent-removal
+        sensitivity very differently despite similar accuracy; this does not identify their internal reasoning.
+      </p>
+    </div>
+    <div class="columns is-vcentered">
+      <div class="column is-7"><figure class="fig">
+        <img src="static/images/f1_heatmap.png" alt="Pairwise Spearman rho heatmaps between the five models on AV2 and Waymo" loading="lazy">
+        <figcaption class="fig-caption">Pairwise Spearman ρ between the LOO rankings of the five models on AV2 (left) and Waymo (right).</figcaption>
+      </figure></div>
+      <div class="column is-5"><figure class="fig">
+        <video poster="static/f1_replay_poster.jpg" autoplay muted loop playsinline controls preload="metadata">
+          <source src="static/f1_replay.mp4" type="video/mp4">
+        </video>
+        <figcaption class="fig-caption">The scene of the teaser in motion: 2 s of logged history, a pause at prediction time
+          with each model's LOO top-1 circled, then the 6 s logged future that forecasts are scored against.</figcaption>
+      </figure></div>
+    </div>
+
+    <h3 class="title is-4" style="margin-top:2.5rem"><span class="finding-tag tag-f2">F2</span>LOO aligns only partially with human annotation</h3>
+    <div class="content has-text-justified">
+      <p>
+        Against Waymo CausalAgents labels (41,095 annotated scenes), Prec@1—the probability that a model's LOO top-1 belongs
+        to the human-annotated causal set—shows a 2.3–3.5× lift over chance (0.137) for every model. Yet in 17.4% of scenes
+        (\(n = 7{,}135\)) no model selects any majority-labeled causal agent as its top-1, and in 0.65% all five select the same
+        non-causal agent. A mismatch with this reference is not by itself an error: the model may rely on a valid predictive
+        proxy, the annotation may omit a relevant cue, or the label itself may be uncertain. The alignment is partial at the
+        scene level too: when only one model in a pair picks the causal agent, it has the lower minADE<sub>6</sub> in 51.3% of
+        cases, near chance.
+      </p>
+    </div>
+    <div class="columns">
+      <div class="column is-6"><figure class="fig">
+        <img src="static/images/f2_prec1.png" alt="Per-model LOO top-1 Prec@1" loading="lazy">
+        <figcaption class="fig-caption">Per-model LOO top-1 Prec@1 (random chance 0.137).</figcaption></figure></div>
+      <div class="column is-6"><figure class="fig">
+        <img src="static/images/f2_concordance.png" alt="Pairwise concordance by scene-difficulty quartile" loading="lazy">
+        <figcaption class="fig-caption">Pairwise concordance by scene-difficulty quartile, with and without AutoBot (chance 50%).</figcaption></figure></div>
+    </div>
+    <div class="columns">
+      <div class="column is-6"><figure class="fig">
+        <img src="static/images/f2_scene_a.png" alt="All five models pick the same distant non-causal agent" loading="lazy">
+        <figcaption class="fig-caption">Distant same-direction non-causal pick.</figcaption></figure></div>
+      <div class="column is-6"><figure class="fig">
+        <img src="static/images/f2_scene_b.png" alt="All five models pick the same non-causal agent at an intersection" loading="lazy">
+        <figcaption class="fig-caption">Intersection non-causal pick.</figcaption></figure></div>
+    </div>
+    <p class="fig-caption">Two Waymo scenes from the 0.65% in which all five models select the same
+      <strong style="color:#E91E63">non-causal agent</strong> as top-1. The human-annotated
+      <strong style="color:#0891B2">causal agent</strong> is spatially and temporally related to the focal vehicle, yet no model
+      picks it as top-1. Dashed trajectories show each agent's future 6-second path.</p>
+
+    <h3 class="title is-4" style="margin-top:2.5rem"><span class="finding-tag tag-f3">F3</span>What models attend to differs from what they depend on</h3>
+    <div class="content has-text-justified">
+      <p>
+        For the four models with extractable agent-to-agent attention, attention and LOO rankings are effectively unrelated
+        within each model (Spearman ρ ∈ [0.003, 0.033]): what a model says it attends to and what its forecast is sensitive to
+        are separate dimensions, so attention does not yet work as a proxy for agent-removal sensitivity.
+      </p>
+    </div>
+    <div class="columns">
+      <div class="column is-6"><figure class="fig">
+        <img src="static/images/f3_demo.png" alt="DeMo: attention top-1 closer to the causal agent" loading="lazy">
+        <figcaption class="fig-caption">DeMo — attention closer to causal.</figcaption></figure></div>
+      <div class="column is-6"><figure class="fig">
+        <img src="static/images/f3_wayformer.png" alt="Wayformer: LOO top-1 closer to the causal agent" loading="lazy">
+        <figcaption class="fig-caption">Wayformer — LOO closer to causal.</figcaption></figure></div>
+    </div>
+    <p class="fig-caption"><strong style="color:#FF7F0E">Attention top-1</strong> and <strong style="color:#8C564B">LOO top-1</strong>
+      point to different agents; unselected <strong style="color:#0891B2">causal candidates</strong> are also shown.</p>
+  </div>
+</section>
+
+<!-- ───────── Proposal ───────── -->
+<section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Two axes to report next to minADE</h2>
+    <div class="columns">
+      <div class="column is-6"><div class="axis-card axis-primary">
+        <h4>Primary axis: Prec@1 <span class="finding-tag tag-f2">F2</span></h4>
+        <p>The rate at which a model's LOO top-1 aligns with human causal labels. It is added alongside minADE, not in place of
+          it: at similar accuracy, closer alignment with a public human reference counts as progress. We propose it not because
+          a mismatch is an error, but because agreement with a public reference is auditable and comparable across models.</p>
+      </div></div>
+      <div class="column is-6"><div class="axis-card axis-secondary">
+        <h4>Secondary axis: within-model attention–LOO ρ <span class="finding-tag tag-f3">F3</span></h4>
+        <p>The two signals are currently effectively unrelated, meaning attention does not yet work as a reliance proxy.
+          Raising this agreement would make attention a checked proxy for agent-removal sensitivity; closing the gap would
+          not invalidate the LOO instrument.</p>
+      </div></div>
+    </div>
+    <div class="columns is-vcentered">
+      <div class="column is-8"><figure class="fig">
+        <img src="static/images/companion.png" alt="Companion-metric profile across the five architectures" loading="lazy">
+        <figcaption class="fig-caption">minADE<sub>6</sub> is nearly flat across architectures (Δ = 0.062), while the reliance
+          metrics diverge: Prec@1 (Δ = 0.165) and within-model attention–LOO ρ (Δ = 0.030).</figcaption></figure></div>
+      <div class="column is-4"><figure class="fig">
+        <img src="static/images/cross_dataset.png" alt="Waymo LOO Prec@1 against AV2 cross-dataset minFDE6" loading="lazy">
+        <figcaption class="fig-caption">Higher in-domain Prec@1 co-occurs with lower cross-dataset error (Pearson r = −0.97,
+          p = 0.005). With five architectures we present this as a hypothesis; two independently retrained checkpoint sets
+          reproduce its direction but not its strength.</figcaption></figure></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── BibTeX ───────── -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{park2026beyond,
+  title     = {Beyond Accuracy: Auditing Agent-Removal Sensitivity in Motion Forecasting},
+  author    = {Park, Geonyeong and Park, Byounghun and Kim, Nayoung and Kim, Kyungmin and Hwang, Soonmin},
+  booktitle = {The Fortieth Annual Conference on Neural Information Processing Systems Evaluations and Datasets Track},
+  year      = {2026}
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered">
+          <p>This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.</p>
+          <p>Adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '\\[', right: '\\]', display: true}, {left: '\\(', right: '\\)', display: false}]});"></script>
+</body>
+</html>
