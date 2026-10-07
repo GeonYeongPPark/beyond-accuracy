@@ -1,7 +1,7 @@
 """Render the paper figures used on the page into static/images/ (white background, web widths).
 
 Run after the paper figures change. Needs PyMuPDF (fitz) and the paper repository checkout.
-    python src/make_images.py [--figures /path/to/2026_NeurIPS_format/Figure]
+    python src/make_images.py [--figures /path/to/2026_NeurIPS_format/Figure] [protocol.png ...]
 """
 import argparse
 from pathlib import Path
@@ -10,7 +10,7 @@ import fitz  # PyMuPDF
 
 JOBS = {  # page image: (paper figure PDF, width in px)
     "overview.png": ("Fig_Overview_Cute_Comic.pdf", 2000),      # Fig. 1
-    "protocol.png": ("Teaser_v10_from_original.pdf", 2000),     # Fig. 3
+    "protocol.png": ("Teaser_v11_ppt.pdf", 2000),               # Fig. 3
     "validation.png": ("Fig_Validation_Summary_v4.pdf", 1800),  # Fig. 4
     "f1_heatmap.png": ("Fig2_Heatmap.pdf", 1600),               # Fig. 5
     "f2_prec1.png": ("Fig_F2_combined_a.pdf", 1100),            # Fig. 6a
@@ -28,10 +28,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--figures", type=Path,
                     default=Path("/home/geonyeong/park_ws/UniTraj/2026_NeurIPS_format/Figure"))
+    ap.add_argument("names", nargs="*", help="page images to render (default: all)")
     args = ap.parse_args()
     out = Path(__file__).resolve().parents[1] / "static/images"
     out.mkdir(parents=True, exist_ok=True)
     for name, (src, width) in JOBS.items():
+        if args.names and name not in args.names:
+            continue
         page = fitz.open(args.figures / src)[0]
         zoom = width / page.rect.width
         page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), alpha=False).save(out / name)

@@ -178,12 +178,12 @@
       </p>
     </div>
     <figure class="fig">
-      <img src="static/images/protocol.png" alt="The LOO Reliance Audit protocol and a worked example on one Waymo scene" loading="lazy">
+      <img src="static/images/protocol.png" alt="The LOO Reliance Audit protocol and how one LOO score is computed" loading="lazy">
       <figcaption class="fig-caption"><strong>The protocol.</strong> Bottom: each surrounding agent \(a_i\) of a scene
         \(S\) is masked in turn, the signed change in minADE<sub>6</sub> against the recorded future is its agent-removal
         sensitivity \(\Delta_i\), and the rankings are compared across models, with human causal labels, and with attention
-        (RQ1–RQ3). Top right: the same steps for MTR on the scene above, where hiding the vehicle ahead (\(a_i\)) costs the
-        most.</figcaption>
+        (RQ1–RQ3). Top right: one score in detail: switching off an agent changes the forecast, not the recorded future it
+        is scored against; repeating this for every agent and sorting gives the model's ranking.</figcaption>
     </figure>
   </div>
 </section>
