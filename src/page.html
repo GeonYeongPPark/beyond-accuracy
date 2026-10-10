@@ -1,5 +1,5 @@
 <title>Beyond Accuracy</title>
-<!-- Nerfies-style project page (Bulma). Text and numbers follow the camera-ready paper (v4); keep them in sync. -->
+<!-- Nerfies-style project page (Bulma). Text and numbers follow the camera-ready paper; keep them in sync. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -47,7 +47,8 @@
   .axis-secondary { background: #f7f1ee; border: 1px solid #ead9d1; }
   .axis-card h4 { font-family: 'Google Sans', sans-serif; font-weight: 700; margin-bottom: 0.35rem; }
   .katex-display { margin: 1rem 0 1.1rem; }
-  pre { white-space: pre-wrap; word-break: break-word; }
+  pre, .content pre { white-space: pre-wrap; word-break: break-word; overflow-x: visible; }
+  pre, code { font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace; }
   .footer { padding: 2.5rem 1.5rem 3rem; }
 
   @media screen and (max-width: 768px) {
@@ -87,14 +88,10 @@
           </div>
 
           <div class="publication-links">
-            <!-- TODO: replace href="#" and drop is-soon for Paper and arXiv when they exist -->
+            <!-- TODO: point Paper at https://openreview.net/forum?id=7axaNwvSMD and drop is-soon after the camera-ready upload -->
             <span class="link-block">
               <a href="#" class="external-link button is-normal is-rounded is-dark is-soon" title="coming soon">
                 <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper (soon)</span></a>
-            </span>
-            <span class="link-block">
-              <a href="#" class="external-link button is-normal is-rounded is-dark is-soon" title="coming soon">
-                <span class="icon"><i class="ai ai-arxiv"></i></span><span>arXiv (soon)</span></a>
             </span>
             <span class="link-block">
               <a href="https://github.com/GeonYeongPPark/beyond-accuracy-code" class="external-link button is-normal is-rounded is-dark">
@@ -344,7 +341,8 @@
   title     = {Beyond Accuracy: Auditing Agent-Removal Sensitivity in Motion Forecasting},
   author    = {Park, Geonyeong and Park, Byounghun and Kim, Nayoung and Kim, Kyungmin and Hwang, Soonmin},
   booktitle = {The Fortieth Annual Conference on Neural Information Processing Systems Evaluations and Datasets Track},
-  year      = {2026}
+  year      = {2026},
+  url       = {https://openreview.net/forum?id=7axaNwvSMD}
 }</code></pre>
   </div>
 </section>
